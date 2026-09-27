@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simple bold "A" glyph, kept inside the adaptive-icon safe zone (66dp circle) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,32 L74,76 L65,76 L61,66 L47,66 L43,76 L34,76 Z M54,44 L48,58 L60,58 Z" />
+</vector>

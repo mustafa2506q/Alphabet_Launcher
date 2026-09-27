@@ -1,0 +1,13 @@
+<resources>
+    <!--
+        This is a plain framework theme, not Material Components — the app has
+        no traditional XML views, only Compose (MaterialTheme in Theme.kt
+        handles all real theming). This style exists purely so the manifest's
+        android:theme reference resolves and the window background looks sane
+        before Compose takes over.
+    -->
+    <style name="Theme.AlphabetLauncher" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+    </style>
+</resources>
