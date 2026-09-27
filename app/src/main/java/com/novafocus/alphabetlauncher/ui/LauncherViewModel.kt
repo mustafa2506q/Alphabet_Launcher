@@ -3,6 +3,7 @@ package com.novafocus.alphabetlauncher.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.novafocus.alphabetlauncher.data.AppInfo
+import com.novafocus.alphabetlauncher.data.FavouritesStore
 import com.novafocus.alphabetlauncher.data.InstalledAppsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,10 +13,11 @@ import kotlinx.coroutines.launch
 data class LauncherUiState(
     val allApps: List<AppInfo> = emptyList(),
     val favourites: List<AppInfo> = emptyList(),
+    val letterHasApps: Set<Char> = emptySet(), // which letters have at least one app
     val selectedLetter: Char? = null,
     val isDragging: Boolean = false,
 ) {
-    /** Requirement 6/7: filtered, sorted list for the selected letter, with an empty state. */
+    // Apps matching whichever letter is currently selected, sorted A-Z.
     val appsForSelectedLetter: List<AppInfo>
         get() = selectedLetter?.let { letter ->
             allApps.filter { it.firstLetter == letter }.sortedBy { it.label.lowercase() }
@@ -24,30 +26,20 @@ data class LauncherUiState(
 
 class LauncherViewModel(
     private val repository: InstalledAppsRepository,
-    favouritePackageNames: List<String> = DEFAULT_FAVOURITE_HINTS,
+    private val favouritesStore: FavouritesStore,
+    private val fallbackHints: List<String> = DEFAULT_FAVOURITE_HINTS,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LauncherUiState())
     val uiState: StateFlow<LauncherUiState> = _uiState.asStateFlow()
 
-    private val favouriteHints = favouritePackageNames
-
     init {
-        // Load once at startup — this is the *only* place PackageManager is queried
-        // outside of the live-update listener below (requirement #10).
         val apps = repository.loadApps()
-        _uiState.value = _uiState.value.copy(
-            allApps = apps,
-            favourites = pickFavourites(apps),
-        )
+        applyApps(apps)
 
+        // Refresh if the user installs/removes something while the app is open.
         viewModelScope.launch {
-            repository.observePackageChanges().collect { refreshedApps ->
-                _uiState.value = _uiState.value.copy(
-                    allApps = refreshedApps,
-                    favourites = pickFavourites(refreshedApps),
-                )
-            }
+            repository.observePackageChanges().collect { apps -> applyApps(apps) }
         }
     }
 
@@ -64,15 +56,34 @@ class LauncherViewModel(
         )
     }
 
+    // Long-press on an app row calls this. Persists immediately so it
+    // survives the app being closed and reopened.
+    fun onToggleFavourite(app: AppInfo) {
+        favouritesStore.toggleFavourite(app.packageName)
+        applyApps(_uiState.value.allApps)
+    }
+
+    private fun applyApps(apps: List<AppInfo>) {
+        _uiState.value = _uiState.value.copy(
+            allApps = apps,
+            favourites = pickFavourites(apps),
+            letterHasApps = apps.map { it.firstLetter }.toSet(),
+        )
+    }
+
+    // User's own long-pressed favourites win if there are any. Otherwise
+    // fall back to a guess at common apps, or just the first few installed.
     private fun pickFavourites(apps: List<AppInfo>): List<AppInfo> {
+        val saved = favouritesStore.getFavourites()
+        if (saved.isNotEmpty()) {
+            return apps.filter { it.packageName in saved }.sortedBy { it.label.lowercase() }
+        }
         val byPackage = apps.associateBy { it.packageName }
-        val matched = favouriteHints.mapNotNull { byPackage[it] }
+        val matched = fallbackHints.mapNotNull { byPackage[it] }
         return if (matched.size >= 5) matched.take(7) else apps.take(6)
     }
 
     companion object {
-        // Best-effort common package names; falls back to "first N installed
-        // apps" per the assignment's own wording if none of these are present.
         private val DEFAULT_FAVOURITE_HINTS = listOf(
             "com.android.dialer",
             "com.android.mms",
