@@ -8,6 +8,8 @@ app starting with the letter under the finger.
 Built for the NovaFocus Private Limited Android Developer Assignment.
 
 **Screen recording:** [https://canva.link/h40e5wcw73h1wn2]
+- 1 min video showing features and animation etc
+- canva public link 
 
 ---
 
