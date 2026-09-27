@@ -17,10 +17,6 @@ Built for the NovaFocus Private Limited Android Developer Assignment.
 |--------------------------------------------------|------------------------------------------------|----------------------------------------|---------------------------------------|
 | ![resting-light](screenshots/resting_light.jpeg) | ![resting-dark](screenshots/resting_dark.jpeg) | ![dragging](screenshots/dragging.jpeg) | ![empty](screenshots/search_bar.jpeg) |
 
-> Add these four images to a `/screenshots` folder in the repo root before pushing —
-> resting home screen, the bar mid-drag with the letter bubble visible, and a
-> letter with no matching apps showing the empty state.
-
 ---
 
 ## Core requirements — status
