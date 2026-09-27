@@ -7,7 +7,7 @@ app starting with the letter under the finger.
 
 Built for the NovaFocus Private Limited Android Developer Assignment.
 
-**Screen recording:** [add your video link here — YouTube unlisted / Drive / Loom]
+**Screen recording:** [https://canva.link/h40e5wcw73h1wn2]
 
 ---
 
